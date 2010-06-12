@@ -36,7 +36,7 @@ BN_PLUS='+'
 BN_0='+|0'
 BN_1='+|1'
 
-bn_max() {
+int_max() {
   [ "${1}" -gt "${2}" ] && echo -n "${1}" || echo -n "${2}"
 }
 
@@ -52,7 +52,7 @@ bn_negate() {
   local bgarray=( $( bn_digits "${n}" ) )
   local s=$( bn_sign "${n}")
 
-  [ -z "${s}" ] && s="${BN_MINUS}" || s="${BN_PLUS}"
+  [ "${s}" == ${BN_PLUS} ] && s="${BN_MINUS}" || s="${BN_PLUS}"
 
   echo -n "${s}|${bgarray[*]}"
 }
@@ -67,9 +67,8 @@ bn_size() {
 
 bn_sign() {
   local bg="${1}"
-
   local sign="${bg%%|*}"
-  [ "$sign" == '-' ] || sign=''
+  
   echo -n "${sign}"
 }
 
@@ -83,7 +82,6 @@ bn_append() {
   local a="$( bn_sanitize "${1}" )"
   local b="$( bn_sanitize "${2}" )"
   local aSign="$( bn_sign "${a}" )"
-  [ -z "${aSign}" ] && aSign='+'
   local aDigits="$( bn_digits "${a}" )"
   local bDigits="$( bn_digits "${b}" )"
 
@@ -94,7 +92,6 @@ bn_prepend() {
   local a="$( bn_sanitize "${1}" )"
   local b="$( bn_sanitize "${2}" )"
   local aSign="$( bn_sign "${a}" )"
-  [ -z "${aSign}" ] && aSign='+'
   local aDigits="$( bn_digits "${a}" )"
   local bDigits="$( bn_digits "${b}" )"
 
@@ -111,11 +108,10 @@ bn_lastdigit() {
 bn_sanitize() {
   local n="${1}"
   local nSign="$( bn_sign "${n}" )"
-  [ -z "${nSign}" ] && nSign='+'
   local nDigits=( $( bn_digits "${n}" ) )
 
   while [ ${#nDigits[@]} -gt 1 ] && [ ${nDigits[$(( ${#nDigits[*]} - 1))]} -eq 0 ] 
-  do 
+  do
     unset nDigits[$(( ${#nDigits[*]} - 1))]
   done
 
@@ -132,7 +128,8 @@ bn_to_string() {
   local digits=( $( bn_digits "${n}" ) )
   local lastdigit="$( bn_lastdigit "${n}" )"
   local i=''
-  local result="${sign}"
+  local result=''
+  [ "${sign}" == '-' ] && result="${sign}"
   
   for ((i=lastdigit; i>=0; i--))
   do
@@ -158,6 +155,7 @@ bn_create() {
     digits[${#digits[@]}]=${s:${c}:1}
   done
 
+  
   if [ "${s:0:1}" == '-' ] || [ "${s:0:1}" == '+' ]
   then
     sign="${s:0:1}"
@@ -165,7 +163,6 @@ bn_create() {
     digits[${#digits[@]}]=${s:0:1}
   fi
   bn_sanitize "${sign}|${digits[*]}"
-
 }
 
 bn_larger() {
@@ -197,7 +194,7 @@ bn_add() {
   local carry='0'
   local aDigits=( $( bn_digits "${a}" ) )
   local bDigits=( $( bn_digits "${b}" ) )
-  local lastdigit=$( bn_max "${#aDigits[*]}" "${#bDigits[*]}" )
+  local lastdigit=$( int_max "${#aDigits[*]}" "${#bDigits[*]}" )
   local cDigits=()
 
   local i=''
@@ -217,15 +214,16 @@ bn_add() {
 }
 
 is_pos() {
-  [ -z "$( bn_sign "${1}" )" ]
+  [ "$( bn_sign "${1}" )" == '+' ]
 }
 
 is_neg() {
-  [ -n "$( bn_sign "${1}" )" ]
+  [ "$( bn_sign "${1}" )" == '-' ]
 }
 
 is_bignum() {
   local bg="${1}"
+
   local sign="${bg%%|*}"
 
   [ "${sign}" == '-' ] || [ "${sign}" == '+' ]
@@ -253,7 +251,7 @@ bn_subtract() {
 
   local aDigits=( $( bn_digits "${a}" ) )
   local bDigits=( $( bn_digits "${b}" ) )
-  local lastdigit=$( bn_max "${#aDigits[*]}" "${#bDigits[*]}" )
+  local lastdigit=$( int_max "${#aDigits[*]}" "${#bDigits[*]}" )
   local cDigits=()
   local borrow=0
   local i=''
@@ -299,7 +297,7 @@ bn_gt() {
 
   local aLen=${#aDigits[*]}
   local bLen=${#bDigits[*]}
-  local lastdigit=$( bn_max "${aLen}" "${bLen}" )
+  local lastdigit=$( int_max "${aLen}" "${bLen}" )
   local i=''
 
   if [ "${aSign}" == "${BN_PLUS}" ]
