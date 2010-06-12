@@ -1,0 +1,50 @@
+Bash Bignum
+A Bignum solution implemented in pure Bash
+http://github.com/ess/bashbignum
+
+PURPOSE
+=======
+
+Aside from giving me the ability to claim to be a Big Jerk (TM), I guess there
+are situations in which it would be somewhat awesome to be able to handle
+ridiculously large integers (and their calculations) in a pure Bash environment.
+
+Remember ... we can't always guarantee that bc will exist on a given system.
+
+If you can believe this, I actually have a project in mind for which this
+capability is an absolute requirement.
+
+FEATURES
+========
+
+* Integers so large that they can fill up the entirety of your memory, if you
+  so choose.
+
+* Addition!
+
+* Subtraction!
+
+* Multiplication!
+
+* Division!
+
+* Modulo Division!
+
+* Negation!
+
+* Intuitive Comparisons!
+
+* While the arithmetic operations are about as well-optimized as I could figure,
+  Bash Bignum caluculations are Awesomely Slow.
+
+BASICS
+======
+
+source /path/to/bignum.sh
+
+a="$( bn_create '100000000000000000000000000000000000')"
+b="$( bn_create '10000000000000000000000000000000000')"
+
+echo "$( bn_to_string "$( bn_add "${a}" "${b}" )" )"
+
+echo "Read through the source until I've had time to document this crap."

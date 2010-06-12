@@ -1,0 +1,4 @@
+* Finish bn_result_sign, even though it's easily complete enough for internal
+  use in bignum.sh
+
+* Finish writing the unit tests.  Yeah.  Unit tests.  For a bash script.
